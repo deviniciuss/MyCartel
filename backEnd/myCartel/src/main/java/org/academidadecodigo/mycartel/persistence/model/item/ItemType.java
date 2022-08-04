@@ -6,21 +6,26 @@ import java.util.List;
 public enum ItemType {
 
     /**
-     * @see CheckingAccount
+     * @see ShrimpItem
      */
-    CHECKING,
+    SHRIMP,
 
     /**
-     * @see SavingsAccount
+     * @see MariachiItem
      */
-    SAVINGS;
+    MARIACHI,
+
+    /**
+     * @see TacoItem
+     */
+    TACO;
 
     /**
      * Lists the account types
      *
      * @return the list of account types
      */
-    public static List<AccountType> list() {
-        return Arrays.asList(AccountType.values());
+    public static List<ItemType> list() {
+        return Arrays.asList(ItemType.values());
     }
 }

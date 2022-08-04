@@ -1,26 +1,22 @@
 package org.academidadecodigo.mycartel.converters;
 
+import org.academidadecodigo.mycartel.command.GangMemberDto;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GangMemberToGangMemberDto extends AbstractConverter<Customer, CustomerDto> {
+public class GangMemberToGangMemberDto extends AbstractConverter<GangMember, GangMemberDto> {
 
-    /**
-     * Converts the customer model object into a customer DTO
-     *
-     * @param customer the customer
-     * @return the customer DTO
-     */
     @Override
-    public CustomerDto convert(Customer customer) {
+    public GangMemberDto convert(GangMember gangMember) {
 
-        CustomerDto customerDto = new CustomerDto();
-        customerDto.setId(customer.getId());
-        customerDto.setFirstName(customer.getFirstName());
-        customerDto.setLastName(customer.getLastName());
-        customerDto.setEmail(customer.getEmail());
-        customerDto.setPhone(customer.getPhone());
+        GangMemberDto GangMemberDto = new GangMemberDto();
+        GangMemberDto.setId(gangMember.getId());
+        GangMemberDto.setFirstName(gangMember.getFirstName());
+        GangMemberDto.setLastName(gangMember.getLastName());
+        GangMemberDto.setEmail(gangMember.getEmail());
+        GangMemberDto.setPhone(gangMember.getPhone());
 
-        return customerDto;
+        return GangMemberDto;
     }
 }

@@ -1,221 +1,122 @@
 package org.academidadecodigo.mycartel.services;
 
+import org.academidadecodigo.mycartel.exceptions.AssociationExistsException;
+import org.academidadecodigo.mycartel.exceptions.GangMemberNotFoundException;
+import org.academidadecodigo.mycartel.exceptions.ItemNotFoundException;
+import org.academidadecodigo.mycartel.persistence.dao.GangMemberDao;
+import org.academidadecodigo.mycartel.persistence.dao.ItemDao;
+import org.academidadecodigo.mycartel.persistence.model.AbstractModel;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
+import org.academidadecodigo.mycartel.persistence.model.item.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class GangMemberServiceImpl implements CustomerService {
+public class GangMemberServiceImpl implements GangMemberService {
 
-    private CustomerDao customerDao;
-    private RecipientDao recipientDao;
-    private AccountDao accountDao;
+    private GangMemberDao gangMemberDao;
+    private ItemDao itemDao;
 
-    /**
-     * Sets the customer data access object
-     *
-     * @param customerDao the account DAO to set
-     */
+
     @Autowired
-    public void setCustomerDao(CustomerDao customerDao) {
-        this.customerDao = customerDao;
+    public void setGangMemberDao(GangMemberDao gangMemberDao) {
+        this.gangMemberDao = gangMemberDao;
     }
 
-    /**
-     * Sets the recipient data access object
-     *
-     * @param recipientDao the recipient DAO to set
-     */
+
     @Autowired
-    public void setRecipientDao(RecipientDao recipientDao) {
-        this.recipientDao = recipientDao;
+    public void setItemDao(ItemDao itemDao) {
+        this.itemDao = itemDao;
     }
 
-    /**
-     * Sets the account data access object
-     *
-     * @param accountDao the account DAO to set
-     */
-    @Autowired
-    public void setAccountDao(AccountDao accountDao) {
-        this.accountDao = accountDao;
-    }
-
-    /**
-     * @see CustomerService#get(Integer)
-     */
     @Override
-    public Customer get(Integer id) {
-        return customerDao.findById(id);
+    public GangMember get(Integer id) {
+        return gangMemberDao.findById(id);
     }
 
-    /**
-     * @see CustomerService#getBalance(Integer)
-     */
-    @Override
-    public double getBalance(Integer id) throws CustomerNotFoundException {
 
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
-
-        return customer.getAccounts().stream()
-                .mapToDouble(Account::getBalance)
-                .sum();
-    }
 
     /**
-     * @see CustomerService#save(Customer)
+     * @see GangMemberService#save(GangMember)
      */
     @Transactional
     @Override
-    public Customer save(Customer customer) {
-        return customerDao.saveOrUpdate(customer);
+    public GangMember save(GangMember gangMember) {
+        return gangMemberDao.saveOrUpdate(gangMember);
     }
 
     /**
-     * @see CustomerService#delete(Integer)
+     * @see GangMemberService#delete(Integer)
      */
     @Transactional
     @Override
-    public void delete(Integer id) throws CustomerNotFoundException, AssociationExistsException {
+    public void delete(Integer id) throws GangMemberNotFoundException {
 
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
+        GangMember gangMember = Optional.ofNullable(gangMemberDao.findById(id))
+                .orElseThrow(GangMemberNotFoundException::new);
 
-        if (!customer.getAccounts().isEmpty()) {
-            throw new AssociationExistsException();
+        if (!gangMember.getItems().isEmpty()) {
+            throw new GangMemberNotFoundException();
         }
 
-        customerDao.delete(id);
+        gangMemberDao.delete(id);
     }
 
     /**
-     * @see CustomerService#list()
+     * @see GangMemberService#list()
      */
     @Override
-    public List<Customer> list() {
-        return customerDao.findAll();
+    public List<GangMember> list() {
+        return gangMemberDao.findAll();
     }
 
     /**
-     * @see CustomerService#listRecipients(Integer)
-     */
-    @Transactional(readOnly = true)
-    @Override
-    public List<Recipient> listRecipients(Integer id) throws CustomerNotFoundException {
-
-        // check then act logic requires transaction,
-        // event if read only
-
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
-
-        return new ArrayList<>(customer.getRecipients());
-    }
-
-    /**
-     * @see CustomerService#addRecipient(Integer, Recipient)
      */
     @Transactional
     @Override
-    public Recipient addRecipient(Integer id, Recipient recipient) throws CustomerNotFoundException, AccountNotFoundException {
+    public Item addItem(Integer id, Item item) throws GangMemberNotFoundException {
 
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
+        GangMember gangMember = Optional.ofNullable(gangMemberDao.findById(id))
+                .orElseThrow(GangMemberNotFoundException::new);
 
-        if (accountDao.findById(recipient.getAccountNumber()) == null ||
-                getAccountIds(customer).contains(recipient.getAccountNumber())) {
-            throw new AccountNotFoundException();
-        }
 
-        if (recipient.getId() == null) {
-            customer.addRecipient(recipient);
-            customerDao.saveOrUpdate(customer);
-        } else {
-            recipientDao.saveOrUpdate(recipient);
-        }
-        return customer.getRecipients().get(customer.getRecipients().size() - 1);
+        gangMember.addItem(item);
+        gangMemberDao.saveOrUpdate(gangMember);
+
+        return gangMember.getItems().get(gangMember.getItems().size() - 1);
     }
 
-    /**
-     * @see CustomerService#removeRecipient(Integer, Integer)
-     */
+
     @Transactional
     @Override
-    public void removeRecipient(Integer id, Integer recipientId) throws CustomerNotFoundException, RecipientNotFoundException {
+    public void deleteItem(Integer id, Integer accountId)
+            throws GangMemberNotFoundException, ItemNotFoundException {
 
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
+        GangMember gangMember = Optional.ofNullable(gangMemberDao.findById(id))
+                .orElseThrow(GangMemberNotFoundException::new);
 
-        Recipient recipient = Optional.ofNullable(recipientDao.findById(recipientId))
-                .orElseThrow(RecipientNotFoundException::new);
+        Item item = Optional.ofNullable(itemDao.findById(accountId))
+                .orElseThrow(ItemNotFoundException::new);
 
-        if (!customer.getRecipients().contains(recipient)) {
-            throw new RecipientNotFoundException();
+        if (!item.getGangMember().getId().equals(id)) {
+            throw new ItemNotFoundException();
         }
 
-        customer.removeRecipient(recipient);
-        customerDao.saveOrUpdate(customer);
+
+        gangMember.removeItem(item);
+        gangMemberDao.saveOrUpdate(gangMember);
     }
 
-    /**
-     * @see CustomerService#addAccount(Integer, Account)
-     */
-    @Transactional
-    @Override
-    public Account addAccount(Integer id, Account account) throws CustomerNotFoundException, TransactionInvalidException {
+    private Set<Integer> getItemIds(GangMember gangMember) {
+        List<Item> items = gangMember.getItems();
 
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
-
-        if (!account.canWithdraw() &&
-                account.getBalance() < SavingsAccount.MIN_BALANCE) {
-            throw new TransactionInvalidException();
-        }
-
-        customer.addAccount(account);
-        customerDao.saveOrUpdate(customer);
-
-        return customer.getAccounts().get(customer.getAccounts().size() - 1);
-    }
-
-    /**
-     * @see CustomerService#closeAccount(Integer, Integer)
-     */
-    @Transactional
-    @Override
-    public void closeAccount(Integer id, Integer accountId)
-            throws CustomerNotFoundException, AccountNotFoundException, TransactionInvalidException {
-
-        Customer customer = Optional.ofNullable(customerDao.findById(id))
-                .orElseThrow(CustomerNotFoundException::new);
-
-        Account account = Optional.ofNullable(accountDao.findById(accountId))
-                .orElseThrow(AccountNotFoundException::new);
-
-        if (!account.getCustomer().getId().equals(id)) {
-            throw new AccountNotFoundException();
-        }
-
-        //different from 0 in case we later decide that negative values are acceptable
-        if (account.getBalance() != 0) {
-            throw new TransactionInvalidException();
-        }
-
-        customer.removeAccount(account);
-        customerDao.saveOrUpdate(customer);
-    }
-
-    private Set<Integer> getAccountIds(Customer customer) {
-        List<Account> accounts = customer.getAccounts();
-
-        return accounts.stream()
+        return items.stream()
                 .map(AbstractModel::getId)
                 .collect(Collectors.toSet());
     }

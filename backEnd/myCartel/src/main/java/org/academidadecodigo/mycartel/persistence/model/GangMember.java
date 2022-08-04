@@ -1,12 +1,14 @@
 package org.academidadecodigo.mycartel.persistence.model;
 
+import org.academidadecodigo.mycartel.persistence.model.item.Item;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "item")
-public class Item extends AbstractModel {
+@Table(name = "gangmember")
+public class GangMember extends AbstractModel {
 
     private String firstName;
     private String lastName;
@@ -27,20 +29,8 @@ public class Item extends AbstractModel {
             // fetch accounts from database together with user
             fetch = FetchType.EAGER
     )
-    private List<Account> accounts = new ArrayList<>();
+    private List<Item> items = new ArrayList<>();
 
-    @OneToMany(
-            // propagate changes on customer entity to account entities
-            cascade = {CascadeType.ALL},
-
-            // make sure to remove recipients if unlinked from customer
-            orphanRemoval = true,
-
-            // use recipient foreign key on recipient table to establish
-            // the many-to-one relationship instead of a join table
-            mappedBy = "customer"
-    )
-    private List<Recipient> recipients = new ArrayList<>();
 
     /**
      * Gets the first name of the customer
@@ -119,57 +109,29 @@ public class Item extends AbstractModel {
      *
      * @return the accounts
      */
-    public List<Account> getAccounts() {
-        return accounts;
+    public List<Item> getItems() {
+        return items;
     }
 
-    /**
-     * Gets the customer recipients
-     *
-     * @return the recipients
-     */
-    public List<Recipient> getRecipients() {
-        return recipients;
-    }
 
     /**
      * Adds a new account to the customer
      *
-     * @param account the account to add
+     * @param item the account to add
      */
-    public void addAccount(Account account) {
-        accounts.add(account);
-        account.setCustomer(this);
+    public void addItem(Item item) {
+        items.add(item);
+        item.setGangMember(this);
     }
 
     /**
      * Removes an account from the customer
      *
-     * @param account the account to remove
+     * @param item the account to remove
      */
-    public void removeAccount(Account account) {
-        accounts.remove(account);
-        account.setCustomer(null);
-    }
-
-    /**
-     * Adds a new recipient to the customer
-     *
-     * @param recipient the recipient to add
-     */
-    public void addRecipient(Recipient recipient) {
-        recipients.add(recipient);
-        recipient.setCustomer(this);
-    }
-
-    /**
-     * Removes a recipient from the customer
-     *
-     * @param recipient the recipient to remove
-     */
-    public void removeRecipient(Recipient recipient) {
-        recipients.remove(recipient);
-        recipient.setCustomer(null);
+    public void removeItem(Item item) {
+        items.remove(item);
+        item.setGangMember(null);
     }
 
     /**
@@ -185,10 +147,11 @@ public class Item extends AbstractModel {
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
-                ", accounts=" + accounts +
+                ", item=" + items +
                 "} " + super.toString();
     }
 }
+
 
 
 

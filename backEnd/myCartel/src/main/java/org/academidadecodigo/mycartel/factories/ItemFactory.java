@@ -1,31 +1,37 @@
 package org.academidadecodigo.mycartel.factories;
 
+import org.academidadecodigo.mycartel.errors.ErrorMessage;
+import org.academidadecodigo.mycartel.persistence.model.item.*;
 import org.springframework.stereotype.Component;
 
     @Component
     public class ItemFactory {
 
         /**
-         * Creates a new {@link Account}
+         * Creates a new {@link Item}
          *
-         * @param accountType the account type
+         * @param itemType the account type
          * @return the new account
          */
-        public Account createAccount(AccountType accountType) {
+        public Item createItem(ItemType itemType) {
 
-            Account newAccount;
+            Item newItem;
 
-            switch (accountType) {
-                case CHECKING:
-                    newAccount = new CheckingAccount();
+            switch (itemType) {
+                case MARIACHI:
+                    newItem = new MariachiItem();
                     break;
-                case SAVINGS:
-                    newAccount = new SavingsAccount();
+                case SHRIMP:
+                    newItem = new ShrimpItem();
+                    break;
+                case TACO:
+                    newItem = new TacoItem();
                     break;
                 default:
-                    throw new IllegalArgumentException(ErrorMessage.TRANSACTION_INVALID);
+                    throw new IllegalArgumentException();
             }
 
-            return newAccount;
+            return newItem;
         }
+    }
 

@@ -1,51 +1,38 @@
 package org.academidadecodigo.mycartel.persistence.model.item;
 
+import org.academidadecodigo.mycartel.persistence.model.AbstractModel;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
+
 import javax.persistence.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "account_type")
+@DiscriminatorColumn(name = "item_type")
 public abstract class Item extends AbstractModel {
 
-    private double balance = 0;
-
+    private String itemName;
+    private String description;
     @ManyToOne
-    private Customer customer;
+    private GangMember gangMember;
 
-    /**
-     * Gets the account balance
-     *
-     * @return the account balance
-     */
-    public double getBalance() {
-        return balance;
-    }
 
-    /**
-     * Sets the account balance
-     *
-     * @param balance the amount to set
-     */
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
 
     /**
      * Gets the account costumer
      *
      * @return the customer
      */
-    public Customer getCustomer() {
-        return customer;
+    public GangMember getGangMember() {
+        return gangMember;
     }
 
     /**
      * Sets the account costumer
      *
-     * @param customer the customer to set
+     * @param gangMember the customer to set
      */
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setGangMember(GangMember gangMember) {
+        this.gangMember = gangMember;
     }
 
     /**
@@ -53,69 +40,14 @@ public abstract class Item extends AbstractModel {
      *
      * @return the account type
      */
-    public abstract AccountType getAccountType();
+    public abstract ItemType getItemType();
 
-    /**
-     * Credits account if possible
-     *
-     * @param amount the amount to credit
-     * @see Account#credit(double)
-     */
-    public void credit(double amount) {
-        if (canCredit(amount)) {
-            balance += amount;
-        }
-    }
-
-    /**
-     * Debits the account if possible
-     *
-     * @param amount the amount to debit
-     * @see Account#canDebit(double)
-     */
-    public void debit(double amount) {
-        if (canDebit(amount)) {
-            balance -= amount;
-        }
-    }
-
-    /**
-     * Checks if a specific amount can be credited on the account
-     *
-     * @param amount the amount to check
-     * @return {@code true} if the account can be credited
-     */
-    public boolean canCredit(double amount) {
-        return amount > 0;
-    }
-
-    /**
-     * Checks if a specific amount can be debited from the account
-     *
-     * @param amount the amount to check
-     * @return {@code true} if the account can be debited
-     */
-    public boolean canDebit(double amount) {
-        return amount > 0 && amount <= balance;
-    }
-
-    /**
-     * Checks if the account can be withdrawn
-     *
-     * @return {@code true} if withdraw can be done
-     */
-    public boolean canWithdraw() {
-        return true;
-    }
-
-    /**
-     * @see Object#toString()
-     */
     @Override
     public String toString() {
-        return "Account{" +
-                "balance=" + balance +
-                ", customerId=" + (customer != null ? customer.getId() : null) +
-                "} " + super.toString();
+        return "Item{" +
+                "itemName='" + itemName + '\'' +
+                ", description='" + description + '\'' +
+                ", gangMember=" + gangMember +
+                '}';
     }
 }

@@ -1,5 +1,14 @@
 package org.academidadecodigo.mycartel.controller.web;
 
+import org.academidadecodigo.mycartel.command.GangMemberDto;
+import org.academidadecodigo.mycartel.command.ItemDto;
+import org.academidadecodigo.mycartel.converters.GangMemberDtoToGangMember;
+import org.academidadecodigo.mycartel.converters.GangMemberToGangMemberDto;
+import org.academidadecodigo.mycartel.converters.ItemToItemDto;
+import org.academidadecodigo.mycartel.exceptions.GangMemberNotFoundException;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
+import org.academidadecodigo.mycartel.persistence.model.item.ItemType;
+import org.academidadecodigo.mycartel.services.GangMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,168 +26,89 @@ import javax.validation.Valid;
 public class GangMemberController {
 
 
-    private CustomerService customerService;
+    private GangMemberService gangMemberService;
 
-    private CustomerToCustomerDto customerToCustomerDto;
-    private CustomerDtoToCustomer customerDtoToCustomer;
-    private AccountToAccountDto accountToAccountDto;
-
-    /**
-     * Sets the customer service
-     *
-     * @param customerService the customer service to set
-     */
+    private GangMemberToGangMemberDto gangMemberToGangMemberDto;
+    private GangMemberDtoToGangMember gangMemberDtoGangMember;
+    private ItemToItemDto itemToItemDto;
     @Autowired
-    public void setCustomerService(CustomerService customerService) {
-        this.customerService = customerService;
+    public GangMemberService getGangMemberService() {
+        return gangMemberService;
+    }
+    @Autowired
+    public GangMemberToGangMemberDto getGangMemberToGangMemberDto() {
+        return gangMemberToGangMemberDto;
+    }
+    @Autowired
+    public GangMemberDtoToGangMember getGangMemberDtoGangMember() {
+        return gangMemberDtoGangMember;
+    }
+    @Autowired
+    public ItemToItemDto getItemToItemDto() {
+        return itemToItemDto;
     }
 
-    /**
-     * Sets the converter for converting between customer model objects and customer DTO
-     *
-     * @param customerToCustomerDto the customer to customer DTO converter to set
-     */
-    @Autowired
-    public void setCustomerToCustomerDto(CustomerToCustomerDto customerToCustomerDto) {
-        this.customerToCustomerDto = customerToCustomerDto;
-    }
-
-    /**
-     * Sets the converter for converting between customer DTO and customer model objects
-     *
-     * @param customerDtoToCustomer the customer DTO to customer converter to set
-     */
-    @Autowired
-    public void setCustomerDtoToCustomer(CustomerDtoToCustomer customerDtoToCustomer) {
-        this.customerDtoToCustomer = customerDtoToCustomer;
-    }
-
-    /**
-     * Sets the converter for converting between account model object and account DTO
-     *
-     * @param accountToAccountDto the account model object to account DTO converter to set
-     */
-    @Autowired
-    public void setAccountToAccountDto(AccountToAccountDto accountToAccountDto) {
-        this.accountToAccountDto = accountToAccountDto;
-    }
-
-    /**
-     * Renders a view with a list of customers
-     *
-     * @param model the model object
-     * @return the view to render
-     */
     @RequestMapping(method = RequestMethod.GET, path = {"/list", "/", ""})
     public String listCustomers(Model model) {
-        model.addAttribute("customers", customerToCustomerDto.convert(customerService.list()));
-        return "customer/list";
+        model.addAttribute("gangmember", gangMemberToGangMemberDto.convert(gangMemberService.list()));
+        return "gangmember/list";
     }
 
-    /**
-     * Adds a customer
-     *
-     * @param model the model object
-     * @return the view to render
-     */
     @RequestMapping(method = RequestMethod.GET, path = "/add")
     public String addCustomer(Model model) {
-        model.addAttribute("customer", new CustomerDto());
-        return "customer/add-update";
+        model.addAttribute("gangmember", new GangMemberDto());
+        return "gangmember/add-update";
     }
 
-    /**
-     * Edits a customer
-     *
-     * @param id    the customer id
-     * @param model the model object
-     * @return the view to render
-     */
     @RequestMapping(method = RequestMethod.GET, path = "/{id}/edit")
-    public String editCustomer(@PathVariable Integer id, Model model) {
-        model.addAttribute("customer", customerToCustomerDto.convert(customerService.get(id)));
-        return "customer/add-update";
+    public String editGangMember(@PathVariable Integer id, Model model) {
+        model.addAttribute("gangmember", gangMemberToGangMemberDto.convert(gangMemberService.get(id)));
+        return "gangmember/add-update";
     }
 
-    /**
-     * Renders a view with customer details
-     *
-     * @param id    the customer id
-     * @param model the model object
-     * @return the view to render
-     * @throws Exception
-     */
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
-    public String showCustomer(@PathVariable Integer id, Model model) throws Exception {
+    public String showGangMember(@PathVariable Integer id, Model model) throws Exception {
 
-        Customer customer = customerService.get(id);
+        GangMember gangMember = gangMemberService.get(id);
 
         // command objects for customer show view
-        model.addAttribute("customer", customerToCustomerDto.convert(customer));
-        model.addAttribute("accounts", accountToAccountDto.convert(customer.getAccounts()));
-        model.addAttribute("accountTypes", AccountType.list());
-        model.addAttribute("customerBalance", customerService.getBalance(id));
+        model.addAttribute("gangMember", gangMemberToGangMemberDto.convert(gangMember));
+        model.addAttribute("items", itemToItemDto.convert(gangMember.getItems()));
+        model.addAttribute("itemTypes", ItemType.list());
+
 
         // command objects for modals
-        AccountDto accountDto = new AccountDto();
-        AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
-        accountTransactionDto.setId(id);
+        ItemDto itemDto = new ItemDto();
 
-        model.addAttribute("account", accountDto);
-        model.addAttribute("accountTransaction", accountTransactionDto);
-
-        model.addAttribute("transfer", new TransferDto());
-        return "customer/show";
+        model.addAttribute("item", itemDto);
+        return "gangMember/show";
     }
 
-    /**
-     * Saves the customer form submission and renders a view
-     *
-     * @param customerDto        the customer DTO object
-     * @param bindingResult      the binding result object
-     * @param redirectAttributes the redirect attributes object
-     * @return the view to render
-     */
+
     @RequestMapping(method = RequestMethod.POST, path = {"/", ""}, params = "action=save")
-    public String saveCustomer(@Valid @ModelAttribute("customer") CustomerDto customerDto, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String saveGangMember(@Valid @ModelAttribute("gangMember") GangMemberDto gangMemberDto, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            return "customer/add-update";
+            return "gangmember/add-update";
         }
 
-        Customer savedCustomer = customerService.save(customerDtoToCustomer.convert(customerDto));
+        GangMember savedGangMember = gangMemberService.save(gangMemberDtoGangMember.convert(gangMemberDto));
 
-        redirectAttributes.addFlashAttribute("lastAction", "Saved " + savedCustomer.getFirstName() + " " + savedCustomer.getLastName());
-        return "redirect:/customer/" + savedCustomer.getId();
+        redirectAttributes.addFlashAttribute("lastAction", "Saved " + savedGangMember.getFirstName() + " " + savedGangMember.getLastName());
+        return "redirect:/customer/" + savedGangMember.getId();
     }
 
-    /**
-     * Cancels the customer submission and renders the default the customer view
-     *
-     * @return the view to render
-     */
     @RequestMapping(method = RequestMethod.POST, path = {"/", ""}, params = "action=cancel")
     public String cancelSaveCustomer() {
         // we could use an anchor tag in the view for this, but we might want to do something clever in the future here
-        return "redirect:/customer/";
+        return "redirect:/gangmember/";
     }
 
-    /**
-     * Deletes the customer and renders the default customer view
-     *
-     * @param id                 the customer id
-     * @param redirectAttributes the redirect attributes object
-     * @return the view to render
-     * @throws AssociationExistsException
-     * @throws CustomerNotFoundException
-     */
     @RequestMapping(method = RequestMethod.GET, path = "{id}/delete")
-    public String deleteCustomer(@PathVariable Integer id, RedirectAttributes redirectAttributes) throws AssociationExistsException, CustomerNotFoundException {
-        Customer customer = customerService.get(id);
-        customerService.delete(id);
-        redirectAttributes.addFlashAttribute("lastAction", "Deleted " + customer.getFirstName() + " " + customer.getLastName());
+    public String deleteGangMember(@PathVariable Integer id, RedirectAttributes redirectAttributes) throws GangMemberNotFoundException {
+        GangMember gangMember = gangMemberService.get(id);
+        gangMemberService.delete(id);
+        redirectAttributes.addFlashAttribute("lastAction", "Deleted " + gangMember.getFirstName() + " " + gangMember.getLastName());
         return "redirect:/customer";
     }
-}
-
 }

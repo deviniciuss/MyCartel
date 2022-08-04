@@ -1,5 +1,14 @@
 package org.academidadecodigo.mycartel.controller.rest;
 
+import org.academidadecodigo.mycartel.command.ItemDto;
+import org.academidadecodigo.mycartel.converters.ItemDtoToItem;
+import org.academidadecodigo.mycartel.converters.ItemToItemDto;
+import org.academidadecodigo.mycartel.exceptions.GangMemberNotFoundException;
+import org.academidadecodigo.mycartel.exceptions.ItemNotFoundException;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
+import org.academidadecodigo.mycartel.persistence.model.item.Item;
+import org.academidadecodigo.mycartel.services.GangMemberService;
+import org.academidadecodigo.mycartel.services.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,153 +28,89 @@ import java.util.stream.Collectors;
 public class RestItemController {
 
 
-    private CustomerService customerService;
-    private AccountService accountService;
-    private AccountToAccountDto accountToAccountDto;
-    private AccountDtoToAccount accountDtoToAccount;
+    private GangMemberService gangMemberService;
+    private ItemService itemService;
+    private ItemToItemDto itemToItemDto;
+    private ItemDtoToItem itemDtoToItem;
 
-    /**
-     * Sets the customer service
-     *
-     * @param customerService the customer service to set
-     */
     @Autowired
-    public void setCustomerService(CustomerService customerService) {
-        this.customerService = customerService;
+    public void setGangMemberService(GangMemberService gangMemberService) {
+        this.gangMemberService = gangMemberService;
     }
 
-    /**
-     * Sets the account service
-     *
-     * @param accountService the account service to set
-     */
     @Autowired
-    public void setAccountService(AccountService accountService) {
-        this.accountService = accountService;
+    public void setItemService(ItemService itemService) {
+        this.itemService = itemService;
     }
 
-    /**
-     * Sets the converter for converting between account model object and account DTO
-     *
-     * @param accountToAccountDto the account model object to account DTO converter to set
-     */
     @Autowired
-    public void setAccountToAccountDto(AccountToAccountDto accountToAccountDto) {
-        this.accountToAccountDto = accountToAccountDto;
+    public void setItemToItemDto(ItemToItemDto itemToItemDto) {
+        this.itemToItemDto = itemToItemDto;
     }
 
-    /**
-     * Sets the converter for converting between account DTO and account model objects
-     *
-     * @param accountDtoToAccount the account DTO to account converter to set
-     */
     @Autowired
-    public void setAccountDtoToAccount(AccountDtoToAccount accountDtoToAccount) {
-        this.accountDtoToAccount = accountDtoToAccount;
+    public void setItemDtoToItem(ItemDtoToItem itemDtoToItem) {
+        this.itemDtoToItem = itemDtoToItem;
     }
 
-    /**
-     * Retrieves a representation of the given customer accounts
-     *
-     * @param cid the customer id
-     * @return the response entity
-     */
-    @RequestMapping(method = RequestMethod.GET, path = "/{cid}/account")
-    public ResponseEntity<List<AccountDto>> listCustomerAccounts(@PathVariable Integer cid) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{cid}/item")
+    public ResponseEntity<List<ItemDto>> listGangMemberItem(@PathVariable Integer cid) {
 
-        Customer customer = customerService.get(cid);
+        GangMember gangMember = gangMemberService.get(cid);
 
-        if (customer == null) {
+        if (gangMember == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        List<AccountDto> accountDtos = customer.getAccounts().stream().map(account -> accountToAccountDto.convert(account)).collect(Collectors.toList());
+        List<ItemDto> accountDtos = gangMember.getItems().stream().map(account -> itemToItemDto.convert(account)).collect(Collectors.toList());
 
         return new ResponseEntity<>(accountDtos, HttpStatus.OK);
     }
 
-    /**
-     * Retrieves a representation of the customer account
-     *
-     * @param cid the customer id
-     * @param aid the account id
-     * @return the response entity
-     */
-    @RequestMapping(method = RequestMethod.GET, path = "/{cid}/account/{aid}")
-    public ResponseEntity<AccountDto> showCustomerAccount(@PathVariable Integer cid, @PathVariable Integer aid) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{cid}/item/{aid}")
+    public ResponseEntity<ItemDto> showGangMemberItem(@PathVariable Integer cid, @PathVariable Integer aid) {
 
-        Account account = accountService.get(aid);
+        Item item = itemService.get(aid);
 
-        if (account == null || account.getCustomer() == null) {
+        if (item == null || item.getGangMember() == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (!account.getCustomer().getId().equals(cid)) {
+        if (!item.getGangMember().getId().equals(cid)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(accountToAccountDto.convert(account), HttpStatus.OK);
+        return new ResponseEntity<>(itemToItemDto.convert(item), HttpStatus.OK);
     }
 
-    /**
-     * Adds an account
-     *
-     * @param cid                  the customer id
-     * @param accountDto           the account DTO
-     * @param bindingResult        the binding result object
-     * @param uriComponentsBuilder the uri components builder object
-     * @return the response entity
-     */
-    @RequestMapping(method = RequestMethod.POST, path = "/{cid}/account")
-    public ResponseEntity<?> addAccount(@PathVariable Integer cid, @Valid @RequestBody AccountDto accountDto, BindingResult bindingResult, UriComponentsBuilder uriComponentsBuilder) {
+    @RequestMapping(method = RequestMethod.POST, path = "/{cid}/item")
+    public ResponseEntity<?> addItem(@PathVariable Integer cid, @Valid @RequestBody ItemDto itemDto, BindingResult bindingResult, UriComponentsBuilder uriComponentsBuilder) {
 
-        if (bindingResult.hasErrors() || accountDto.getId() != null) {
+        if (bindingResult.hasErrors() || itemDto.getId() != null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        try {
+        Item item = itemService.addItem(cid, itemDtoToItem.convert(itemDto));
 
-            Account account = customerService.addAccount(cid, accountDtoToAccount.convert(accountDto));
+        UriComponents uriComponents = uriComponentsBuilder.path("/api/gangMember/" + cid + "/item/" + item.getId()).build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(uriComponents.toUri());
 
-            UriComponents uriComponents = uriComponentsBuilder.path("/api/customer/" + cid + "/account/" + account.getId()).build();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(uriComponents.toUri());
-
-            return new ResponseEntity<>(headers, HttpStatus.CREATED);
-
-        } catch (CustomerNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        } catch (TransactionInvalidException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
 
     }
 
-    /**
-     * Closes an account
-     *
-     * @param cid the customer id
-     * @param aid the accound id
-     * @return the response entity
-     */
-    @RequestMapping(method = RequestMethod.GET, path = "/{cid}/account/{aid}/close")
-    public ResponseEntity<?> closeAccount(@PathVariable Integer cid, @PathVariable Integer aid) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{cid}/item/{aid}/close")
+    public ResponseEntity<?> deleteItem(@PathVariable Integer cid, @PathVariable Integer aid) {
 
         try {
 
-            customerService.closeAccount(cid, aid);
+            gangMemberService.deleteItem(cid, aid);
 
             return new ResponseEntity<>(HttpStatus.OK);
 
-        } catch (CustomerNotFoundException e) {
+        } catch (GangMemberNotFoundException | ItemNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        } catch (AccountNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        } catch (TransactionInvalidException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         }
     }

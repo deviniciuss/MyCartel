@@ -1,5 +1,7 @@
 package org.academidadecodigo.mycartel.persistence.dao;
 
+import org.academidadecodigo.mycartel.persistence.model.Model;
+
 import java.util.List;
 
 public interface Dao<T extends Model> {

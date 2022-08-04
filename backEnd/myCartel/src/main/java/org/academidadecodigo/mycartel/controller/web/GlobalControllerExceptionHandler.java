@@ -1,5 +1,6 @@
 package org.academidadecodigo.mycartel.controller.web;
 
+import org.academidadecodigo.mycartel.exceptions.MyCartelException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -14,28 +15,14 @@ import java.util.Date;
 @ControllerAdvice
 public class GlobalControllerExceptionHandler {
 
-    /**
-     * Renders the bad request page view
-     *
-     * @param req the http request
-     * @param ex  the thrown exception
-     * @return the model to render
-     */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = JavaBankException.class)
-    public ModelAndView handleClientErrors(HttpServletRequest req, JavaBankException ex) {
+    @ExceptionHandler(value = MyCartelException.class)
+    public ModelAndView handleClientErrors(HttpServletRequest req, MyCartelException ex) {
 
         logException(ex);
         return handleError(HttpStatus.BAD_REQUEST, req, ex);
     }
 
-    /**
-     * Renders the internal server error page view
-     *
-     * @param req the http request
-     * @param ex  the thrown exception
-     * @return the model to render
-     */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(value = Exception.class)
     public ModelAndView handleServerErrors(HttpServletRequest req, Exception ex) {
@@ -60,7 +47,7 @@ public class GlobalControllerExceptionHandler {
 
     private void logException(Exception ex) {
 
-        String errorOrigin = ex instanceof JavaBankException ? "Client" : "Server";
+        String errorOrigin = ex instanceof MyCartelException ? "Client" : "Server";
 
         String throwingClassName = ex.getStackTrace()[0].getClassName();
         String throwingMethodName = ex.getStackTrace()[0].getMethodName();
