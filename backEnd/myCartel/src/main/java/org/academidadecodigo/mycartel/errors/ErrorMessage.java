@@ -2,9 +2,9 @@ package org.academidadecodigo.mycartel.errors;
 
 public class ErrorMessage {
 
-    public static final String CUSTOMER_NOT_FOUND = "Customer does not exist";
-    public static final String ACCOUNT_NOT_FOUND = "Account does not exist";
-    public static final String TRANSACTION_INVALID = "Unable to perform transaction";
-    public static final String RECIPIENT_NOT_FOUND = "Recipient does not exist";
+    public static final String GANGMEMBER_NOT_FOUND = "Gang Member does not exist";
+    public static final String ITEM_NOT_FOUND = "Item does not exist";
     public static final String ASSOCIATION_EXISTS = "Entity contains association with another entity";
+
+
 }

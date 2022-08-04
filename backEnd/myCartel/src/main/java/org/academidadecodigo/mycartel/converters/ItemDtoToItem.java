@@ -1,23 +1,17 @@
 package org.academidadecodigo.mycartel.converters;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.academidadecodigo.mycartel.command.ItemDto;
+import org.academidadecodigo.mycartel.factories.ItemFactory;
+import org.academidadecodigo.mycartel.persistence.model.item.Item;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ItemDtoToItem implements Converter<AccountDto, Account> {
+public class ItemDtoToItem implements Converter<ItemDto, Item> {
 
-    private AccountFactory accountFactory;
+    private ItemFactory itemFactory;
 
-    /**
-     * Sets the account factory
-     *
-     * @param accountFactory the account factory to set
-     */
-    @Autowired
-    public void setAccountFactory(AccountFactory accountFactory) {
-        this.accountFactory = accountFactory;
-    }
+
 
     /**
      * Converts the account DTO into a account model object
@@ -26,13 +20,13 @@ public class ItemDtoToItem implements Converter<AccountDto, Account> {
      * @return the account
      */
     @Override
-    public Account convert(AccountDto accountDto) {
+    public Item convert(ItemDto itemDto) {
 
-        Account account = null;
+        Item item = null;
 
-        account = accountFactory.createAccount(accountDto.getType());
-        account.credit(accountDto.getBalance() != null ? Double.parseDouble(accountDto.getBalance()) : 0);
+        item = itemFactory.createItem(itemDto.getType());
 
-        return account;
+
+        return item;
     }
 }

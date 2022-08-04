@@ -1,11 +1,12 @@
 package org.academidadecodigo.mycartel.exceptions;
 
-public class ItemNotFoundException {
+import org.academidadecodigo.mycartel.errors.ErrorMessage;
+
+public class ItemNotFoundException extends Throwable {
 
 
-    public AccountNotFoundException() {
-        super(ErrorMessage.ACCOUNT_NOT_FOUND);
+    public ItemNotFoundException() {
+        super(ErrorMessage.ITEM_NOT_FOUND);
     }
 }
 
-}

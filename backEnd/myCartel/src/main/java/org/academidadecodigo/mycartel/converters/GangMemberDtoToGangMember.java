@@ -1,40 +1,31 @@
 package org.academidadecodigo.mycartel.converters;
 
+import org.academidadecodigo.mycartel.command.GangMemberDto;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
+import org.academidadecodigo.mycartel.services.GangMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GangMemberDtoToGangMember implements Converter<CustomerDto, Customer> {
+public class GangMemberDtoToGangMember implements Converter<GangMemberDto, GangMember> {
 
-    private CustomerService customerService;
+    private GangMemberService gangMemberService;
 
-    /**
-     * Sets the customer service
-     *
-     * @param customerService the customer service to set
-     */
-    @Autowired
-    public void setCustomerService(CustomerService customerService) {
-        this.customerService = customerService;
+    public void setGangMemberService(GangMemberService gangMemberService) {
+        this.gangMemberService = gangMemberService;
     }
 
-    /**
-     * Converts the customer DTO into a customer model object
-     *
-     * @param customerDto the customer DTO
-     * @return the customer
-     */
     @Override
-    public Customer convert(CustomerDto customerDto) {
+    public GangMember convert(GangMemberDto gangMemberDto) {
 
-        Customer customer = (customerDto.getId() != null ? customerService.get(customerDto.getId()) : new Customer());
+        GangMember gangMember = (gangMemberDto.getId() != null ? gangMemberService.get(gangMemberDto.getId()) : new GangMember());
 
-        customer.setFirstName(customerDto.getFirstName());
-        customer.setLastName(customerDto.getLastName());
-        customer.setEmail(customerDto.getEmail());
-        customer.setPhone(customerDto.getPhone());
+        gangMember.setFirstName(gangMemberDto.getFirstName());
+        gangMember.setLastName(gangMemberDto.getLastName());
+        gangMember.setEmail(gangMemberDto.getEmail());
+        gangMember.setPhone(gangMemberDto.getPhone());
 
-        return customer;
+        return gangMember;
     }
 }

@@ -1,6 +1,7 @@
 package org.academidadecodigo.mycartel.persistence.dao.jpa;
 
 import org.academidadecodigo.mycartel.persistence.dao.Dao;
+import org.academidadecodigo.mycartel.persistence.model.Model;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

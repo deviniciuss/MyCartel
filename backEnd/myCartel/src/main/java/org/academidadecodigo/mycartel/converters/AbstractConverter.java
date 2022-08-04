@@ -19,3 +19,4 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
                 .map(this::convert)
                 .collect(Collectors.toList());
     }
+}

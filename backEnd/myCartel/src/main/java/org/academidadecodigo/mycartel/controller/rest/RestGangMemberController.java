@@ -1,5 +1,11 @@
 package org.academidadecodigo.mycartel.controller.rest;
 
+import org.academidadecodigo.mycartel.command.GangMemberDto;
+import org.academidadecodigo.mycartel.converters.GangMemberDtoToGangMember;
+import org.academidadecodigo.mycartel.converters.GangMemberToGangMemberDto;
+import org.academidadecodigo.mycartel.exceptions.GangMemberNotFoundException;
+import org.academidadecodigo.mycartel.persistence.model.GangMember;
+import org.academidadecodigo.mycartel.services.GangMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,94 +24,56 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/customer")
 public class RestGangMemberController {
 
+        private GangMemberService gangMemberService;
+        private GangMemberDtoToGangMember gangMemberDtoToGangMember;
+        private GangMemberToGangMemberDto gangMemberToGangMemberDto;
 
+    @Autowired
+    public void setGangMemberService(GangMemberService gangMemberService) {
+        this.gangMemberService = gangMemberService;
+    }
+    @Autowired
+    public void setGangMemberDtoToGangMember(GangMemberDtoToGangMember gangMemberDtoToGangMember) {
+        this.gangMemberDtoToGangMember = gangMemberDtoToGangMember;
+    }
+    @Autowired
+    public void setGangMemberToGangMemberDto(GangMemberToGangMemberDto gangMemberDto) {
+        this.gangMemberToGangMemberDto = gangMemberDto;
+    }
 
-        private CustomerService customerService;
-        private CustomerDtoToCustomer customerDtoToCustomer;
-        private CustomerToCustomerDto customerToCustomerDto;
+    @RequestMapping(method = RequestMethod.GET, path = {"/", ""})
+        public ResponseEntity<List<GangMemberDto>> listGangMembers() {
 
-        /**
-         * Sets the customer service
-         *
-         * @param customerService the customer service to set
-         */
-        @Autowired
-        public void setCustomerService(CustomerService customerService) {
-            this.customerService = customerService;
-        }
-
-        /**
-         * Sets the converter for converting between customer DTO and customer model objects
-         *
-         * @param customerDtoToCustomer the customer DTO to customer converter to set
-         */
-        @Autowired
-        public void setCustomerDtoToCustomer(CustomerDtoToCustomer customerDtoToCustomer) {
-            this.customerDtoToCustomer = customerDtoToCustomer;
-        }
-
-        /**
-         * Sets the converter for converting between customer model objects and customer DTO
-         *
-         * @param customerToCustomerDto the customer to customer DTO converter to set
-         */
-        @Autowired
-        public void setCustomerToCustomerDto(CustomerToCustomerDto customerToCustomerDto) {
-            this.customerToCustomerDto = customerToCustomerDto;
-        }
-
-        /**
-         * Retrieves a representation of the list of customers
-         *
-         * @return the response entity
-         */
-        @RequestMapping(method = RequestMethod.GET, path = {"/", ""})
-        public ResponseEntity<List<CustomerDto>> listCustomers() {
-
-            List<CustomerDto> customerDtos = customerService.list().stream()
-                    .map(customer -> customerToCustomerDto.convert(customer))
+            List<GangMemberDto> gangMemberDtos = gangMemberService.list().stream()
+                    .map(gangMember -> gangMemberToGangMemberDto.convert(gangMember))
                     .collect(Collectors.toList());
 
-            return new ResponseEntity<>(customerDtos, HttpStatus.OK);
+            return new ResponseEntity<>(gangMemberDtos, HttpStatus.OK);
         }
 
-        /**
-         * Retrieves a representation of the given customer
-         *
-         * @param id the customer id
-         * @return the response entity
-         */
         @RequestMapping(method = RequestMethod.GET, path = "/{id}")
-        public ResponseEntity<CustomerDto> showCustomer(@PathVariable Integer id) {
+        public ResponseEntity<GangMemberDto> showGangMember(@PathVariable Integer id) {
 
-            Customer customer = customerService.get(id);
+            GangMember gangMember = gangMemberService.get(id);
 
-            if (customer == null) {
+            if (gangMember == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            return new ResponseEntity<>(customerToCustomerDto.convert(customer), HttpStatus.OK);
+            return new ResponseEntity<>(gangMemberToGangMemberDto.convert(gangMember), HttpStatus.OK);
         }
 
-        /**
-         * Adds a customer
-         *
-         * @param customerDto          the customer DTO
-         * @param bindingResult        the binding result object
-         * @param uriComponentsBuilder the uri components builder
-         * @return the response entity
-         */
         @RequestMapping(method = RequestMethod.POST, path = {"/", ""})
-        public ResponseEntity<?> addCustomer(@Valid @RequestBody CustomerDto customerDto, BindingResult bindingResult, UriComponentsBuilder uriComponentsBuilder) {
+        public ResponseEntity<?> addGangMember(@Valid @RequestBody GangMemberDto gangMemberDto, BindingResult bindingResult, UriComponentsBuilder uriComponentsBuilder) {
 
-            if (bindingResult.hasErrors() || customerDto.getId() != null) {
+            if (bindingResult.hasErrors() || gangMemberDto.getId() != null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            Customer savedCustomer = customerService.save(customerDtoToCustomer.convert(customerDto));
+            GangMember savedGangMember = gangMemberService.save(gangMemberDtoToGangMember.convert(gangMemberDto));
 
             // get help from the framework building the path for the newly created resource
-            UriComponents uriComponents = uriComponentsBuilder.path("/api/customer/" + savedCustomer.getId()).build();
+            UriComponents uriComponents = uriComponentsBuilder.path("/api/customer/" + savedGangMember.getId()).build();
 
             // set headers with the created path
             HttpHeaders headers = new HttpHeaders();
@@ -113,56 +81,39 @@ public class RestGangMemberController {
 
             return new ResponseEntity<>(headers, HttpStatus.CREATED);
         }
-
-        /**
-         * Edits a customer
-         *
-         * @param customerDto   the customer DTO
-         * @param bindingResult the binding result
-         * @param id            the customer id
-         * @return the response entity
-         */
         @RequestMapping(method = RequestMethod.PUT, path = "/{id}")
-        public ResponseEntity<CustomerDto> editCustomer(@Valid @RequestBody CustomerDto customerDto, BindingResult bindingResult, @PathVariable Integer id) {
+        public ResponseEntity<GangMemberDto> editGangMember(@Valid @RequestBody GangMemberDto gangMemberDto, BindingResult bindingResult, @PathVariable Integer id) {
 
             if (bindingResult.hasErrors()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            if (customerDto.getId() != null && !customerDto.getId().equals(id)) {
+            if (gangMemberDto.getId() != null && !gangMemberDto.getId().equals(id)) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            if (customerService.get(id) == null) {
+            if (gangMemberService.get(id) == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            customerDto.setId(id);
+            gangMemberDto.setId(id);
 
-            customerService.save(customerDtoToCustomer.convert(customerDto));
+            gangMemberService.save(gangMemberDtoToGangMember.convert(gangMemberDto));
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
-        /**
-         * Deletes a customer
-         *
-         * @param id the customer id
-         * @return the response entity
-         */
         @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
-        public ResponseEntity<CustomerDto> deleteCustomer(@PathVariable Integer id) {
+        public ResponseEntity<GangMemberDto> deleteGangMember(@PathVariable Integer id) {
 
             try {
 
-                customerService.delete(id);
+                gangMemberService.delete(id);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-            } catch (AssociationExistsException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-            } catch (CustomerNotFoundException e) {
+            } catch (GangMemberNotFoundException e) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         }
     }
-}
+
