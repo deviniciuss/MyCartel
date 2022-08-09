@@ -3,9 +3,9 @@
 MyCartel was a project from Hackaton - Academia de Código, fortunately my group was runners-up in it.
 
 ## Visuals
-![alt text]()
+<img src="https://github.com/deviniciuss/MyCartel/blob/main/frontEnd/assets/images/siteGIF.gif" alt="drawing" width="70%"/>
 
-![alt text]()
+
 
 
 ## Installation
