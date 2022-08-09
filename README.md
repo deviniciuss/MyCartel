@@ -1,6 +1,6 @@
 # MyCartel
 
-MyCartel was a project from Hackaton - Academia de Código, fortunately my group was runners-up in it.
+MyCartel was a project from Hackaton - Academia de Código, fortunately my group called ByteMyCache, was runners-up in it ^^.
 
 ## Visuals
 <img src="https://github.com/deviniciuss/MyCartel/blob/main/frontEnd/assets/images/siteGIF.gif" alt="drawing" width="70%"/>
