@@ -12,10 +12,10 @@ function doClick() {
      $('input[name="shower"]:checked').val() === 'option2' &&
      $('input[name="cry"]:checked').val() === 'option2' &&
      $('input[name="years"]:checked').val() === 'option1'){
-        location.href ='assets/html/market-place.html';
+        location.href ='/frontEnd/assets/html/market-place.html';
 
     } else{
-        location.href ='assets/html/fail.html';
+        location.href ='/frontEnd/assets/html/fail.html';
     }
 } 
 
@@ -41,13 +41,13 @@ function initMap(){
     });
 
     var infoWindow = new google.maps.InfoWindow({
-        content: '<img src="assets/images/cartel-2.webp" alt="Chef #3">'
+        content: '<img src="/frontEnd/assets/images/cartel-2.webp" alt="Chef #3">'
     })
     var infoWindow1 = new google.maps.InfoWindow({
-        content: '<img src="assets/images/cartel-2.jpg" alt="Chef #2">'
+        content: '<img src="/frontEnd/assets/images/cartel-2.jpg" alt="Chef #2">'
     })
     var infoWindow2 = new google.maps.InfoWindow({
-        content: '<img src="assets/images/en-17-07-18-CenAm-Gangs-Mexico-350x250-c-default.jpg" alt="Chef #1">'
+        content: '<img src="/frontEnd/assets/images/en-17-07-18-CenAm-Gangs-Mexico-350x250-c-default.jpg" alt="Chef #1">'
     })
 
 
